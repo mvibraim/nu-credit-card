@@ -1,5 +1,6 @@
 (ns nu-credit-card.core
   (:require [clojure.pprint :refer [pprint]])
+  (:import (java.time LocalDate))
   (:gen-class))
 
 (defrecord Client [name cpf email])
@@ -52,6 +53,14 @@
        (:card-number)
        (get-purchases-by-card-number)))
 
+(defn is-equals-month?
+  [purchase, numeric-month]
+  (->>
+   (:date purchase)
+   (LocalDate/parse)
+   (.getMonthValue)
+   (= numeric-month)))
+
 (defn expense-by-category
   "Agrupa gastos por categoria"
   [purchases]
@@ -63,9 +72,10 @@
 
 (defn client-invoice
   "Fatura de um cliente"
-  [cpf]
+  [cpf numeric-month]
   (->> cpf
        (get-purchases-by-cpf)
+       (filter #(is-equals-month? %1 numeric-month))
        (sum-purchases-value)))
 
 (defn filter-purchase-by-value
@@ -90,8 +100,8 @@
 
 (add-purchase "2020-12-17" 2000 "casa do ze" "grocery" "55-00")
 (add-purchase "2020-12-17" 1000 "casa do ze" "grocery" "55-00")
-(add-purchase "2020-12-17" 200 "casa maneira" "leisure" "55-00")
-(add-purchase "2020-12-17" 500 "casa maneira" "leisure" "55-00")
+(add-purchase "2020-11-17" 200 "casa maneira" "leisure" "55-00")
+(add-purchase "2020-11-17" 500 "casa maneira" "leisure" "55-00")
 
 (add-purchase "2020-12-17" 900 "casa do ze" "grocery" "66-00")
 (add-purchase "2020-12-17" 10 "casa do ze" "grocery" "66-00")
