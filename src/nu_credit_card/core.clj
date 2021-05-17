@@ -63,9 +63,7 @@
 (defn- expense-by-category
   "Agrupa gastos por categoria"
   [purchases]
-  (reduce (fn
-            [result [category purchases-from-category]]
-            (assoc result category (sum-purchases-value purchases-from-category)))
+  (reduce #(assoc %1 (first %2) (sum-purchases-value (last %2)))
           {}
           (group-by :category purchases)))
 
