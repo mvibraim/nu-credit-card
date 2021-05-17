@@ -1,67 +1,66 @@
 (ns nu-credit-card.core
   (:require [clojure.pprint :refer [pprint]])
-  (:import (java.time LocalDate))
+  (:import java.time.LocalDate)
   (:gen-class))
 
-(defrecord Client [name cpf email])
-(defrecord CreditCard [card-number security-code expiry-date limit cpf])
-(defrecord Purchase [date value institution category card-number])
+(defrecord ^:private Client [name cpf email])
+(defrecord ^:private CreditCard [card-number security-code expiry-date limit cpf])
+(defrecord ^:private Purchase [date value institution category card-number])
 
-(def clients [])
-(def credit-cards [])
-(def purchases [])
+(def ^:private clients [])
+(def ^:private credit-cards [])
+(def ^:private purchases [])
 
-(defn add-client
+(defn- add-client
   [name cpf email]
   (->> email
        (->Client name cpf)
        (conj clients)
        (def clients)))
 
-(defn add-credit-card
+(defn- add-credit-card
   [card-number security-code expiry-date limit cpf]
   (->> cpf
        (->CreditCard card-number security-code expiry-date limit)
        (conj credit-cards)
        (def credit-cards)))
 
-(defn add-purchase
+(defn- add-purchase
   [date value institution category card-number]
   (->> card-number
        (->Purchase date value institution category)
        (conj purchases)
        (def purchases)))
 
-(defn sum-purchases-value
+(defn- sum-purchases-value
   [purchases]
   (reduce #(+ %1 (:value %2)) 0 purchases))
 
-(defn get-credit-card-by-cpf
+(defn- get-credit-card-by-cpf
   [cpf]
   (->> credit-cards
        (filter #(= cpf (:cpf %)))
        (first)))
 
-(defn get-purchases-by-card-number
+(defn- get-purchases-by-card-number
   [card-number]
   (filter #(= card-number (:card-number %)) purchases))
 
-(defn get-purchases-by-cpf
+(defn- get-purchases-by-cpf
   [cpf]
   (->> cpf
        (get-credit-card-by-cpf)
        (:card-number)
        (get-purchases-by-card-number)))
 
-(defn is-equals-month?
+(defn- is-equals-month?
   [purchase, numeric-month]
-  (->>
-   (:date purchase)
-   (LocalDate/parse)
-   (.getMonthValue)
-   (= numeric-month)))
+  (->> (:date purchase)
+       (LocalDate/parse)
+       (.getMonthValue)
+       (= numeric-month)))
 
-(defn expense-by-category
+(defn- expense-by-category
   "Agrupa gastos por categoria"
   [purchases]
   (reduce (fn
@@ -70,22 +69,22 @@
           {}
           (group-by :category purchases)))
 
-(defn client-invoice
+(defn- client-invoice
   "Fatura de um cliente"
   [cpf numeric-month]
   (->> cpf
        (get-purchases-by-cpf)
-       (filter #(is-equals-month? %1 numeric-month))
+       (filter #(is-equals-month? % numeric-month))
        (sum-purchases-value)))
 
-(defn filter-purchase-by-value
+(defn- filter-purchase-by-value
   "Busca compras de um cliente pelo valor"
   [cpf value]
   (->> cpf
        (get-purchases-by-cpf)
        (filter #(= value (:value %)))))
 
-(defn filter-purchase-by-institution
+(defn- filter-purchase-by-institution
   "Busca compras de um cliente pelo estabelecimento"
   [cpf institution]
   (->> cpf
