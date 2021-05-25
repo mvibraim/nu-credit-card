@@ -17,7 +17,15 @@
                     #:db{:ident :client/email
                          :valueType :db.type/string
                          :cardinality :db.cardinality/one
-                         :doc "Client email"}])
+                         :doc "Client email"}
+                    #:db{:ident :client/creditcards
+                         :valueType :db.type/ref
+                         :cardinality :db.cardinality/many
+                         :doc "Client creditcards"}
+                    #:db{:ident :client/purchases
+                         :valueType :db.type/ref
+                         :cardinality :db.cardinality/many
+                         :doc "Client purchases"}])
 
 (def creditcard-schema [#:db{:ident :creditcard/id
                              :valueType :db.type/uuid

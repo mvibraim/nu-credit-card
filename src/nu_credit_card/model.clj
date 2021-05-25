@@ -8,11 +8,11 @@
             :email email}])
 
 (defn new-creditcard
-  [id card-number security-code expiry-date limit cpf]
+  [id card-number security-code expiration limit cpf]
   [#:creditcard{:id id
                 :card-number card-number
                 :security-code security-code
-                :expiry-date expiry-date
+                :expiration expiration
                 :limit limit
                 :cpf cpf}])
 
