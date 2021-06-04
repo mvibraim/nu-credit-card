@@ -7,30 +7,27 @@
 (defrecord ^:private CreditCard [card-number security-code expiry-date limit cpf])
 (defrecord ^:private Purchase [date value institution category card-number])
 
-(def ^:private clients [])
-(def ^:private credit-cards [])
-(def ^:private purchases [])
+(def ^:private clients (atom []))
+(def ^:private credit-cards (atom []))
+(def ^:private purchases (atom []))
 
 (defn- add-client
   [name cpf email]
   (->> email
        (->Client name cpf)
-       (conj clients)
-       (def clients)))
+       (swap! clients conj)))
 
 (defn- add-credit-card
   [card-number security-code expiry-date limit cpf]
   (->> cpf
        (->CreditCard card-number security-code expiry-date limit)
-       (conj credit-cards)
-       (def credit-cards)))
+       (swap! credit-cards conj)))
 
 (defn- add-purchase
   [date value institution category card-number]
   (->> card-number
        (->Purchase date value institution category)
-       (conj purchases)
-       (def purchases)))
+       (swap! purchases conj)))
 
 (defn- sum-purchases-value
   [purchases]
@@ -38,13 +35,13 @@
 
 (defn- get-credit-card-by-cpf
   [cpf]
-  (->> credit-cards
+  (->> @credit-cards
        (filter #(= cpf (:cpf %)))
        (first)))
 
 (defn- get-purchases-by-card-number
   [card-number]
-  (filter #(= card-number (:card-number %)) purchases))
+  (filter #(= card-number (:card-number %)) @purchases))
 
 (defn- get-purchases-by-cpf
   [cpf]
@@ -65,7 +62,7 @@
   [purchases]
   (reduce #(assoc %1 (first %2) (sum-purchases-value (last %2)))
           {}
-          (group-by :category purchases)))
+          (group-by :category @purchases)))
 
 (defn- client-invoice
   "Fatura de um cliente"
